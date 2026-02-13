@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuska Board 🦔</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card: #141414;
+    --card-hover: #1a1a1a;
+    --border: #222;
+    --text: #e5e5e5;
+    --text-dim: #888;
+    --accent: #3b82f6;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --purple: #a855f7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  header h1 span { margin-right: 8px; }
+
+  .stats {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .section {
+    margin-bottom: 28px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+  }
+
+  .section-header .count {
+    background: var(--border);
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 11px;
+  }
+
+  .task {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    position: relative;
+  }
+
+  .task:hover {
+    background: var(--card-hover);
+    border-color: #333;
+  }
+
+  .task.done {
+    opacity: 0.5;
+  }
+
+  .task.done .task-title {
+    text-decoration: line-through;
+  }
+
+  .task-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #444;
+    flex-shrink: 0;
+    margin-top: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .checkbox:hover { border-color: var(--accent); }
+
+  .task.done .checkbox {
+    border-color: var(--green);
+    background: var(--green);
+  }
+
+  .task.done .checkbox::after {
+    content: '✓';
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .task-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .task-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    margin-left: 28px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .tag.owner-kuska { background: #1e1b4b; color: #a78bfa; }
+  .tag.owner-yaosamo { background: #1c1917; color: #fb923c; }
+  .tag.priority-high { background: #1c0a0a; color: var(--red); }
+  .tag.priority-med { background: #1a1400; color: var(--yellow); }
+  .tag.priority-low { background: #0a1a0a; color: var(--green); }
+  .tag.project { background: #0a1628; color: var(--accent); }
+
+  .add-task {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .add-task input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .add-task input:focus { border-color: #444; }
+  .add-task input::placeholder { color: #555; }
+
+  .add-task button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .add-task button:hover { opacity: 0.85; }
+
+  .empty {
+    text-align: center;
+    color: #444;
+    font-size: 13px;
+    padding: 20px;
+  }
+
+  .delete-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+    transition: color 0.15s;
+  }
+
+  .delete-btn:hover { color: var(--red); }
+
+  .filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn.active {
+    background: var(--border);
+    color: var(--text);
+    border-color: #444;
+  }
+
+  .filter-btn:hover { border-color: #444; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span>🦔</span> Kuska Board</h1>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="add-task">
+  <input type="text" id="taskInput" placeholder="Add a task..." />
+  <button onclick="addTask()">Add</button>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">All</button>
+  <button class="filter-btn" data-filter="kuska" onclick="setFilter('kuska', this)">🦔 Kuska</button>
+  <button class="filter-btn" data-filter="yaosamo" onclick="setFilter('yaosamo', this)">Yaosamo</button>
+  <button class="filter-btn" data-filter="active" onclick="setFilter('active', this)">Active</button>
+  <button class="filter-btn" data-filter="done" onclick="setFilter('done', this)">Done</button>
+</div>
+
+<div id="board"></div>
+
+<script>
+const STORAGE_KEY = 'kuska-board-tasks';
+let currentFilter = 'all';
+
+const defaultTasks = [
+  { id: 1, title: 'Build task board web app & deploy to Vercel', done: true, owner: 'kuska', priority: 'high', project: 'tooling', created: Date.now() },
+  { id: 2, title: 'Set up account connections (Gmail, calendar, GitHub)', done: false, owner: 'yaosamo', priority: 'med', project: 'setup', created: Date.now() },
+  { id: 3, title: 'Point lilthings.yaosamo.com to Vercel deploy', done: false, owner: 'yaosamo', priority: 'med', project: 'portfolio', created: Date.now() },
+  { id: 4, title: 'Polish Timezone App — review & improve', done: false, owner: 'kuska', priority: 'low', project: 'timezone', created: Date.now() },
+  { id: 5, title: 'Polish Selfie App — review & improve', done: false, owner: 'kuska', priority: 'low', project: 'selfie', created: Date.now() },
+  { id: 6, title: 'Explore new project ideas & opportunities', done: false, owner: 'kuska', priority: 'med', project: null, created: Date.now() },
+];
+
+function loadTasks() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : defaultTasks;
+}
+
+function saveTasks(tasks) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function toggleTask(id) {
+  const tasks = loadTasks();
+  const task = tasks.find(t => t.id === id);
+  if (task) task.done = !task.done;
+  saveTasks(tasks);
+  render();
+}
+
+function deleteTask(id) {
+  const tasks = loadTasks().filter(t => t.id !== id);
+  saveTasks(tasks);
+  render();
+}
+
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const title = input.value.trim();
+  if (!title) return;
+
+  const tasks = loadTasks();
+  tasks.push({
+    id: Date.now(),
+    title,
+    done: false,
+    owner: 'kuska',
+    priority: 'med',
+    project: null,
+    created: Date.now()
+  });
+  saveTasks(tasks);
+  input.value = '';
+  render();
+}
+
+document.getElementById('taskInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+
+function filterTasks(tasks) {
+  switch (currentFilter) {
+    case 'kuska': return tasks.filter(t => t.owner === 'kuska');
+    case 'yaosamo': return tasks.filter(t => t.owner === 'yaosamo');
+    case 'active': return tasks.filter(t => !t.done);
+    case 'done': return tasks.filter(t => t.done);
+    default: return tasks;
+  }
+}
+
+function render() {
+  const tasks = loadTasks();
+  const filtered = filterTasks(tasks);
+  const active = filtered.filter(t => !t.done);
+  const done = filtered.filter(t => t.done);
+  const totalActive = tasks.filter(t => !t.done).length;
+  const totalDone = tasks.filter(t => t.done).length;
+
+  document.getElementById('stats').textContent = `${totalActive} active · ${totalDone} done`;
+
+  let html = '';
+
+  if (active.length) {
+    html += `<div class="section">
+      <div class="section-header">Active <span class="count">${active.length}</span></div>
+      ${active.map(taskHTML).join('')}
+    </div>`;
+  }
+
+  if (done.length) {
+    html += `<div class="section">
+      <div class="section-header">Done <span class="count">${done.length}</span></div>
+      ${done.map(taskHTML).join('')}
+    </div>`;
+  }
+
+  if (!filtered.length) {
+    html = '<div class="empty">No tasks here yet</div>';
+  }
+
+  document.getElementById('board').innerHTML = html;
+}
+
+function taskHTML(t) {
+  const ownerClass = t.owner === 'kuska' ? 'owner-kuska' : 'owner-yaosamo';
+  const ownerLabel = t.owner === 'kuska' ? '🦔 Kuska' : 'Yaosamo';
+  const prioClass = `priority-${t.priority || 'med'}`;
+  const prioLabel = { high: 'High', med: 'Med', low: 'Low' }[t.priority || 'med'];
+
+  return `<div class="task ${t.done ? 'done' : ''}" >
+    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${t.id})">×</button>
+    <div class="task-top">
+      <div class="checkbox" onclick="event.stopPropagation(); toggleTask(${t.id})"></div>
+      <div class="task-title">${escapeHtml(t.title)}</div>
+    </div>
+    <div class="task-meta">
+      <span class="tag ${ownerClass}">${ownerLabel}</span>
+      <span class="tag ${prioClass}">${prioLabel}</span>
+      ${t.project ? `<span class="tag project">${escapeHtml(t.project)}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+render();
+</script>
+</body>
+</html>
